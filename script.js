@@ -1,8 +1,8 @@
 /**
- * Creates a n x n tic-tac-toe gameBoard
+ * Creates a n x n tic-tac-toe GameBoard
  * 
- * @param {int} n - width and height of the gameBoard
- * @returns {GameBoard} - GameBoard object
+ * @param {int} n - width and height of the GameBoard
+ * @returns {Object} - GameBoard object
  */
 function createGameBoard(n) {
 
@@ -67,41 +67,38 @@ const GAME_STATES = {
 }
 
 /**
- * Creates the game controller for tic-tac-toe on a n x n gameboard
+ * Creates the GameController for tic-tac-toe on a n x n GameBoard
  * 
- * @param {int} n - size of the game board 
- * @returns {GameController} - game controller
+ * @param {int} n - size of GameBoard 
+ * @returns {Object} - GameController Object
  */
 function createGameController(n) {
 
     const gameBoard = createGameBoard(n);
 
-    /**
-     * Represents the state of the game
-     */
-    const gameState = { state: GAME_STATES.ONGOING, winSet: null, };
-
-    let playerOneActive = false;
-    let round = 0;
-
-    // sums of player marks that determine whether a row, column, or any of the diagonals
-    // are marked solely by a single player, which can be used to find the winner.
+    // contains the sum of each n-celled linear section that is used in the win condition
     let rowSums = Array(n).fill(0);
     let colSums = Array(n).fill(0);
     let mainDiagonalSum = 0;
     let crossDiagonalSum = 0;
+
+    let currentGameState = { state: GAME_STATES.ONGOING, winningSet: null };
+
+    let playerOneActive = false;
+
+    let round = 0;
 
     /**
      * Plays a round of the game
      * 
      * @param {int} row - row index of board
      * @param {int} col - column index of board
-     * @returns {GameState} - the current state of the game
+     * @returns {Object} - the current state of the game
      */
     const playRound = (row, col) => {
         // if game has already ended in a win or a draw, return the final game state
-        if (gameState.state === GAME_STATES.WIN || gameState.state === GAME_STATES.DRAW) {
-            return gameState;
+        if (currentGameState.state === GAME_STATES.WIN || currentGameState.state === GAME_STATES.DRAW) {
+            return cloneGameState();
         }
 
         // switch between players
@@ -118,39 +115,38 @@ function createGameController(n) {
 
             playerOneActive = !playerOneActive;
 
-            return gameState;
+            return cloneGameState();
         }
 
         incrementSums(row, col);
 
         if (round === n * n) {
-            gameState.state = GAME_STATES.DRAW;
+            currentGameState.state = GAME_STATES.DRAW;
         }
 
         if (round >= n * 2 - 1) {
-            const winSet = getWinSet(row, col);
+            const winningSet = calculateWinningSet(row, col);
 
-            if (winSet) {
-                gameState.state = GAME_STATES.WIN;
-                gameState.winSet = winSet;
+            if (winningSet) {
+
+                state = GAME_STATES.WIN;
+                currentGameState.winningSet = winningSet;
             }
         }
 
         gameBoard.display();
-        console.log({ rowSum: rowSums[row], colSum: colSums[col], mainDiagonalSum, crossDiagonalSum });
 
-        return gameState;
+        return cloneGameState();
     }
 
     /**
-     * Increments the internal sum variables based on the 
-     * position of the new mark and the active player
+     * Increments sum of the linear section based on the value of most recent
+     * coinciding mark of the active player
      * 
      * @param {int} row 
      * @param {int} col 
      */
     const incrementSums = (row, col) => {
-
         const increment = playerOneActive ? 1 : -1;
 
         rowSums[row] += increment;
@@ -161,6 +157,28 @@ function createGameController(n) {
     }
 
     /**
+     * Clones the current game state for use by external code.
+     * @returns {Object} - cloned game state
+     */
+    const cloneGameState = () => {
+
+        const clone = { state: currentGameState.state, winningSet: null };
+
+        if (currentGameState.winningSet) {
+            const winningSet = [];
+
+            for (let i = 0; i < n; i++) {
+                const [row, col] = currentGameState.winningSet[i];
+                winningSet.push([row, col]);
+            }
+
+            clone.winningSet = winningSet;
+        }
+
+        return clone;
+    }
+
+    /**
      * Determines if a player has won by returning set of (row, column) indices pairs 
      * that represents a linear section of the board. 
      * 
@@ -168,32 +186,32 @@ function createGameController(n) {
      * @param {int} col 
      * @returns {Array} - If no player has won, null is returned.
      */
-    const getWinSet = (row, col) => {
+    const calculateWinningSet = (row, col) => {
 
-        const winSum = playerOneActive ? n : -n;
-        const winSet = [];
+        const winningSum = playerOneActive ? n : -n;
+        const winningSet = [];
 
-        if (rowSums[row] === winSum) {
+        if (rowSums[row] === winningSum) {
             for (let i = 0; i < n; i++) {
-                winSet.push([row, i]);
+                winningSet.push([row, i]);
             }
         }
 
-        else if (colSums[col] === winSum) {
+        else if (colSums[col] === winningSum) {
             for (let i = 0; i < n; i++) {
-                winSet.push([i, col]);
+                winningSet.push([i, col]);
             }
         }
 
-        else if (row === col && mainDiagonalSum === winSum) {
+        else if (row === col && mainDiagonalSum === winningSum) {
             for (let i = 0; i < n; i++) {
-                winSet.push([i, i]);
+                winningSet.push([i, i]);
             }
         }
 
-        else if (row === n - col - 1 && crossDiagonalSum === winSum) {
+        else if (row === n - col - 1 && crossDiagonalSum === winningSum) {
             for (let i = 0; i < n; i++) {
-                winSet.push([i, n - i - 1]);
+                winningSet.push([i, n - i - 1]);
             }
         }
 
@@ -201,7 +219,7 @@ function createGameController(n) {
             return null;
         }
 
-        return winSet;
+        return winningSet;
     }
 
     return { playRound };
