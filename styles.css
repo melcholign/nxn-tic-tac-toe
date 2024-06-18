@@ -1,0 +1,35 @@
+:root {
+    --board-size: min(98vw, 80vh);
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 5px;
+    height: 100vh;
+    margin: 0px;
+    font-size: 1rem;
+}
+
+.board {
+    width: var(--board-size);
+    height: var(--board-size);
+    border: 2px solid black;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.message {
+    width: var(--board-size);
+    height: 50px;
+    border-radius: 5px;
+    background-color: whitesmoke;
+    box-shadow: inset 0px 0px 2px 0px black;
+}
+
+.cell {
+    box-sizing: border-box;
+    border: 1px solid black;
+}
