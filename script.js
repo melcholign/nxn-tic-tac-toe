@@ -1,4 +1,10 @@
-const gameboard = (function (n) {
+/**
+ * Creates a n x n tic-tac-toe gameboard
+ * 
+ * @param {int} n - width and height of the gameboard
+ * @returns {Object} - gameboard object
+ */
+function createGameboard(n) {
 
     const board = [];
 
@@ -26,8 +32,8 @@ const gameboard = (function (n) {
     /**
      * Sets mark at board location of the board
      * 
-     * @param {Number} row - board's row index
-     * @param {Number} col - board's column index
+     * @param {int} row - board's row index
+     * @param {int} col - board's column index
      * @param {Boolean} forPlayerOne - differentiator between the two mark types
      * 
      * @throws an error if the board is already marked at the specified location
@@ -45,12 +51,12 @@ const gameboard = (function (n) {
     /**
      * Returns the mark at board location
      * 
-     * @param {Number} row - board's row index 
-     * @param {Number} col - board's column index
-     * @returns {Number} - 0 or 1 represents marked state, -1 represents unmarked state.
+     * @param {int} row - board's row index 
+     * @param {int} col - board's column index
+     * @returns {int} - 0 or 1 represents marked state, -1 represents unmarked state.
      */
     const getMarkFrom = (row, col) => board[row, col];
 
-    return { setMarkAt, getMarkFrom, display };
+    return { setMarkAt, getMarkFrom, display};
+};
 
-})(3);
