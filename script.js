@@ -25,7 +25,7 @@ function createGameBoard(n) {
 
         for (let i = 0; i < n; ++i) {
 
-            console.log(board[i]);
+            // console.log(board[i]);
         }
     }
 
@@ -39,6 +39,8 @@ function createGameBoard(n) {
      * @throws an error if the board is already marked at the specified location
      */
     const setMarkAt = (row, col, forPlayerOne) => {
+
+        console.log({ row, col });
 
         if (board[row][col] != -1) {
 
@@ -126,10 +128,10 @@ function createGameController(n) {
 
         if (round >= n * 2 - 1) {
             const winningSet = calculateWinningSet(row, col);
-
+            console.log(winningSet)
             if (winningSet) {
 
-                state = GAME_STATES.WIN;
+                currentGameState.state = GAME_STATES.WIN;
                 currentGameState.winningSet = winningSet;
             }
         }
@@ -196,7 +198,6 @@ function createGameController(n) {
                 winningSet.push([row, i]);
             }
         }
-
         else if (colSums[col] === winningSum) {
             for (let i = 0; i < n; i++) {
                 winningSet.push([i, col]);
@@ -224,3 +225,121 @@ function createGameController(n) {
 
     return { playRound };
 }
+
+(function () {
+    const CELL_CLASS = "cell";
+
+    const playerOne = { name: "P1", mark: "X" };
+    const playerTwo = { name: "P2", mark: "O" };
+    let activePlayer = playerOne;
+
+    const boardDiv = document.querySelector(".board");
+    const sizeInputForm = document.querySelector(".size-input");
+    sizeInputForm.addEventListener("submit", startGame)
+
+    let boardSize;
+    let game;
+
+    function startGame(event) {
+        event.preventDefault();
+
+        boardSize = Number(document.querySelector("#size").value);
+        game = createGameController(boardSize);
+
+        // disable form
+        sizeInputForm.classList.add("disabled");
+
+        clearBoard();
+        renderBoard();
+    }
+
+    function renderBoard() {
+        const cellWidthStyle = `calc(100% / ${boardSize})`;
+
+        for (let i = 0; i < boardSize * boardSize; ++i) {
+            // create cell button
+            const cellButton = document.createElement("button");
+            cellButton.value = i;
+            cellButton.classList.add(CELL_CLASS);
+            cellButton.style.width = cellWidthStyle;
+            cellButton.style.height = cellWidthStyle;
+            cellButton.innerText = "\u00A0";
+            cellButton.addEventListener("click", markCell);
+            boardDiv.appendChild(cellButton);
+        }
+    }
+
+    function markCell(event) {
+        const cellButton = event.target;
+        if (cellButton.disabled) {
+            return;
+        }
+
+        const row = Math.floor(cellButton.value / boardSize);
+        const col = cellButton.value % boardSize;
+        const gameState = game.playRound(row, col);
+
+        cellButton.textContent = activePlayer.mark;
+        cellButton.disabled = true;
+
+        if (gameState.state === GAME_STATES.WIN) {
+            displayWin(gameState.winningSet);
+            endGame();
+        }
+
+        if (gameState.state === GAME_STATES.DRAW) {
+            displayDraw();
+            endGame();
+        }
+
+        nextRound();
+    }
+
+    function endGame() {
+        boardDiv.classList.add("disabled");
+        sizeInputForm.classList.remove("disabled");
+    }
+
+    function clearBoard() {
+        while (boardDiv.firstChild) {
+            boardDiv.removeChild(boardDiv.firstChild);
+        }
+
+        boardDiv.classList.remove("disabled");
+    }
+
+    function displayDraw() {
+        document.querySelectorAll(".cell").forEach(cellButton => cellButton.classList.add("draw"))
+    }
+
+    function displayWin(winningSet) {
+        const cellButtons = document.querySelectorAll(".cell");
+
+        let i = 0, j = 0;
+        let row = winningSet[i][0], col = winningSet[i][1];
+
+        while (i < winningSet.length && j < cellButtons.length) {
+
+            if (cellButtons[j].value == row * boardSize + col) {
+
+                cellButtons[j].classList.add("win");
+                cellButtons[j].disabled = true;
+                i++;
+
+                try {
+                    row = winningSet[i][0];
+                    col = winningSet[i][1];
+                } catch (err) {
+
+                }
+            }
+
+            j++;
+        }
+    }
+
+    function nextRound() {
+        activePlayer = activePlayer === playerOne ? playerTwo : playerOne;
+    }
+
+})();

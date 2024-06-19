@@ -13,12 +13,21 @@ body {
     font-size: 1rem;
 }
 
+.size-input {
+    margin-top: 5px;
+}
+
 .board {
     width: var(--board-size);
     height: var(--board-size);
     border: 2px solid black;
     display: flex;
     flex-wrap: wrap;
+}
+
+.disabled {
+    opacity: 50%;
+    pointer-events: none;
 }
 
 .message {
@@ -32,4 +41,29 @@ body {
 .cell {
     box-sizing: border-box;
     border: 1px solid black;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 10vw;
+}
+
+.cell:hover {
+    background-color: rgb(186 178 208);
+}
+
+.cell:disabled {
+    color: black;
+}
+
+.cell:disabled:hover {
+    background-color: rgb(230, 230, 230);
+}
+
+.cell.win {
+    background-color: lightgreen;
+}
+
+.cell.draw {
+    background-color: lightcoral;
 }
